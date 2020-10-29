@@ -2,7 +2,7 @@ import socket
 
 PORT = 5051
 HEADER = 128
-SERVER = "192.168.56.1"
+SERVER = "192.168.69.59"
 FORMAT = "utf-8"
 DISCONNECT_MESSAGE = "!DISCONNECT"
 ADDR = (SERVER, PORT)
@@ -26,11 +26,15 @@ def main():
     print(f"[CONNECTING] attempting to connect to server at {SERVER}")
     client.connect(ADDR)
     print(f"[CONNECTION STATUS] connected to {SERVER}.")
+    clientName = input("[CONNECTING] desired username: ")
+    send(client, clientName)
     helpMsg()
     connected = True
     while connected:
         string = input("[INPUT] enter a command: ")
         commands = string.lower().split()
+        if not commands:
+            continue
         if not commands[0] in COMMANDS:
             print(f"[ERROR] command not found: \"{commands[0]}\"")
         # help command

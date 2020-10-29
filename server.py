@@ -2,8 +2,8 @@ import socket
 import threading
 
 PORT = 5051
-# SERVER = "50.237.25.142" # <-- my computer
-SERVER = socket.gethostbyname(socket.gethostname())
+SERVER = "192.168.69.59" # <-- my computer
+# SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
 HEADER = 128
 FORMAT = "utf-8"
@@ -13,7 +13,14 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDR)
 
 def handleClient(conn, addr):
-    print(f"[NEW CONNECTION] {addr} connected.")
+    clientLen = conn.recv(HEADER).decode(FORMAT)
+    if not clientLen:
+        name = str(addr[0])
+    else:
+        clientLen = int(clientLen)
+        name = conn.recv(clientLen).decode(FORMAT)
+        conn.send("name received".encode(FORMAT))
+    print(f"[NEW CONNECTION] {name} connected.")
     connected = True
     while connected:
         msgLen = conn.recv(HEADER).decode(FORMAT)
@@ -22,12 +29,13 @@ def handleClient(conn, addr):
             msg = conn.recv(msgLen).decode(FORMAT)
             if msg == DISCONNECT_MESSAGE:
                 connected = False
+                conn.send("closing connection".encode(FORMAT))
                 break
             
-            print(f"[{addr}] {msg}")
+            print(f"[{name}] {msg}")
             conn.send("msg received".encode(FORMAT))
     conn.close()
-    print(f"[CLOSING CONNECTION] client at {addr[0]} successfully closed")
+    print(f"[CLOSING CONNECTION] client {name} successfully closed")
 
 def start():
     server.listen()
